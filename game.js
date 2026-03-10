@@ -1,7 +1,11 @@
-window.onerror = function(message, source, lineno) { 
-    console.error(`ERRO: ${message} (Linha: ${lineno})`); 
-    return false; 
-};
+/**
+ * NEBULA FARM PRO - CÓDIGO ÚNICO E COMPLETO 🚜
+ * - Celeiro em código puro (Sem depender de arquivos .glb)
+ * - Arrastar e Soltar (Mouse) funcionando na horta
+ * - Escudo anti-tela preta ativado
+ */
+
+window.onerror = function(message, source, lineno) { console.error(`ERRO: ${message} (Linha: ${lineno})`); return false; };
 
 const firebaseConfig = {
     apiKey: "AIzaSyCCnMspqNoKarOxZxXzaWACNxIV-mi3qNQ",
@@ -21,7 +25,6 @@ class NebulaFarmPro {
         this.grass = null; this.lake = null; this.tiles = []; this.plants = []; this.animations = [];
         this.animals = []; this.pets = []; this.npcs = []; this.factories = []; this.constructions = []; this.obstacles = []; this.decorations = []; this.enclosureFloors = []; 
         
-        // DRAG AND DROP RESTAURADO
         this.isDragging = false; this.activeDragTool = null; this.lastTreePlantTime = 0; 
         this.isPanning = false; this.panStart = { x: 0, y: 0 }; this.hasPanned = false; this.pendingBubble = null;   
         
@@ -145,8 +148,17 @@ class NebulaFarmPro {
         if (checkB(this.state.enclosures.corral, 'btn-corral')) { this.buildEnclosureOld('corral', this.state.enclosures.corral.x||25, this.state.enclosures.corral.z||5); this.obstacles.push({ x: this.state.enclosures.corral.x||25, z: this.state.enclosures.corral.z||5, r: 8 }); }
 
         this.renderGrid(); 
-        if (this.state.savedPlants) { this.state.savedPlants.forEach(sp => { try { if (this.config[sp.type] && this.config[sp.type].isTree) { this.restoreTree(sp); } else { this.restoreCrop(sp); } } catch(e) {} }); }
-        if (this.state.savedDecorations) { this.state.savedDecorations.forEach(sd => { try { this.placeDecoration(sd.type, sd.x, sd.z, false); } catch(e) {} }); }
+        
+        if (this.state.savedPlants) { 
+            this.state.savedPlants.forEach(sp => { 
+                try { if (this.config[sp.type] && this.config[sp.type].isTree) { this.restoreTree(sp); } else { this.restoreCrop(sp); } } catch(e) {} 
+            }); 
+        }
+        if (this.state.savedDecorations) { 
+            this.state.savedDecorations.forEach(sd => { 
+                try { this.placeDecoration(sd.type, sd.x, sd.z, false); } catch(e) {} 
+            }); 
+        }
 
         this.createNPC('Fazendeiro Zé', -10, 5, 0x2980b9, ["Belo dia para plantar!", "Cuidado com as vacas!"]);
         this.createNPC('Visitante Ana', 15, 10, 0x9b59b6, ["Vim comprar queijo!", "Que trator bonito!"]);
@@ -209,6 +221,7 @@ class NebulaFarmPro {
         if (construction.type === 'bakery') this.createBakery(construction.x, construction.z); else if (construction.type === 'dairy') this.createDairy(construction.x, construction.z); else if (construction.type === 'trench') this.createTrench(construction.x, construction.z); else if (construction.type === 'recycler') this.createRecycler(construction.x, construction.z); else if (construction.type === 'doghouse') this.createDoghouse(construction.x, construction.z); else if (construction.type === 'tractor') this.createTractor(construction.x, construction.z); else if (construction.type === 'coop') this.buildEnclosureOld('coop', construction.x, construction.z); else if (construction.type === 'pigpen') this.buildEnclosureOld('pigpen', construction.x, construction.z); else if (construction.type === 'corral') this.buildEnclosureOld('corral', construction.x, construction.z);
         const btn = document.getElementById(`btn-${construction.type}`); if (btn) btn.style.display = 'none'; this.updateUI();
     }
+
     createFarmhouse(x, z) {
         const house = new THREE.Group();
         const wallsMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
@@ -232,21 +245,27 @@ class NebulaFarmPro {
         house.add(walls, roof, door, janelaEsq, janelaDir, chimney); house.position.set(x, 0, z); house.rotation.y = -Math.PI / 6; this.scene.add(house);
     }
 
+    // O CELEIRO NOVO EM CÓDIGO PURO
     createBarn(x, z) {
-        if (typeof THREE.GLTFLoader === 'undefined') return;
-        const loader = new THREE.GLTFLoader();
-        loader.load('celeiro.glb', (gltf) => {
-            const barn = gltf.scene; barn.position.set(x, 0, z); barn.scale.set(1, 1, 1); 
-            const materialParedeVermelha = new THREE.MeshStandardMaterial({ color: 0xFF0000, roughness: 0.8 }); const materialTelhadoCinza = new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.9 }); const materialMadeiraMarrom = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.7 });    
-            barn.traverse((node) => {
-                if (node.isMesh) {
-                    node.castShadow = true; node.receiveShadow = true;
-                    const nomeDaPeca = node.name.toLowerCase(); const nomeDoGrupo = node.parent ? node.parent.name.toLowerCase() : "";
-                    if (nomeDaPeca.includes('triangle') || nomeDoGrupo.includes('triangle')) { node.material = materialTelhadoCinza; } else if (nomeDaPeca.includes('window') || nomeDoGrupo.includes('window') || nomeDaPeca.includes('door') || nomeDoGrupo.includes('door')) { node.material = materialMadeiraMarrom; } else { node.material = materialParedeVermelha; }
-                }
-            });
-            this.scene.add(barn);
-        }, undefined, () => {});
+        const barn = new THREE.Group();
+        const wallsMat = new THREE.MeshStandardMaterial({ color: 0xb71c1c, roughness: 0.9 });
+        const walls = new THREE.Mesh(new THREE.BoxGeometry(10, 6, 8), wallsMat);
+        walls.position.y = 3; walls.castShadow = true; walls.receiveShadow = true;
+        const roofMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.9 });
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(8, 4, 5), roofMat);
+        roof.position.y = 8; roof.rotation.y = Math.PI / 4; roof.castShadow = true;
+        const doorMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
+        const door = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 0.2), doorMat);
+        door.position.set(0, 2, 4.1);
+        const crossMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const cross1 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 0.3), crossMat);
+        cross1.rotation.z = Math.PI / 6; cross1.position.set(0, 2, 4.15);
+        const cross2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 0.3), crossMat);
+        cross2.rotation.z = -Math.PI / 6; cross2.position.set(0, 2, 4.15);
+        barn.add(walls, roof, door, cross1, cross2);
+        barn.position.set(x, 0, z);
+        barn.children.forEach(c => { c.userData = { isBarn: true, parentRef: barn }; });
+        this.scene.add(barn);
     }
 
     createRecycler(x, z) {
@@ -563,25 +582,20 @@ class NebulaFarmPro {
     }
 
     // ==========================================
-    // 8. O RADAR DE CLIQUES (SISTEMA DE ARRASTO)
+    // 8. O RADAR DE CLIQUES NATIVO (MURALHA DE AÇO)
     // ==========================================
     setupInteractions() {
         const raycaster = new THREE.Raycaster(); const mouse = new THREE.Vector2();
         
         window.addEventListener('pointerdown', (e) => {
             if (e.target.closest('.game-header') || e.target.closest('.side-panel') || e.target.closest('.modal-content') || e.target.closest('.bubble-item') || e.target.closest('.login-box')) return;
-            
-            // Inicia o Drag do Mapa
-            this.isPanning = true; this.panStart = { x: e.clientX, y: e.clientY }; this.hasPanned = false; this.pendingBubble = null;
-
-            const bubble = document.getElementById('bubble-menu'); 
-            if (bubble && bubble.style.display === 'flex') { this.hideBubble(); return; } // Fecha menu e morre clique
-
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1; mouse.y = -(e.clientY / window.innerHeight) * 2 + 1; raycaster.setFromCamera(mouse, this.camera);
-            
             if (this.tractor.isDriving) { const hitsGrass = raycaster.intersectObject(this.grass); if (hitsGrass.length > 0) { this.tractor.target = new THREE.Vector3(hitsGrass[0].point.x, 0, hitsGrass[0].point.z); this.spawnFX(e.clientX, e.clientY, "🎯", "#e74c3c"); } return; }
             if (this.placementMode) { const hitsGrass = raycaster.intersectObject(this.grass); if (hitsGrass.length > 0) this.validatePlacementPosition(hitsGrass[0].point.x, hitsGrass[0].point.z); return; }
-            
+            const bubble = document.getElementById('bubble-menu'); if (bubble && bubble.style.display === 'flex') { this.hideBubble(); return; }
+
+            this.isPanning = true; this.panStart = { x: e.clientX, y: e.clientY }; this.hasPanned = false; this.pendingBubble = null;
+
             const hits = raycaster.intersectObjects(this.scene.children, true);
             if (hits.length > 0) {
                 let targetHit = null;
@@ -590,10 +604,9 @@ class NebulaFarmPro {
 
                 const obj = targetHit.object; const ud = obj.userData || {};
 
-                // A ORDEM MAGICA DAS PRIORIDADES DE CLIQUE
                 if (ud.isTile) { 
                     if (!ud.occupied) { this.pendingBubble = { x: e.clientX, y: e.clientY, ctx: 'plant_crop', hitObj: ud.tileRef }; }
-                    return; // MATA A ÁRVORE. Bateu na horta, morre aqui.
+                    return; // MATA O CLIQUE NA HORTA! SE BATEU NO BLOCO MARROM, NÃO PASSA PRA ÁRVORE.
                 } 
                 else if (ud.isPlant) { const plantObj = this.plants.find(p => p.mesh === ud.parentRef); if (plantObj && plantObj.progress >= 1) { this.pendingBubble = { x: e.clientX, y: e.clientY, ctx: 'harvest_plant', hitObj: ud.parentRef }; } }
                 else if (ud.isNPC) { const npc = this.npcs.find(n => n.mesh === ud.parentRef); if (npc) this.spawnFX(e.clientX, e.clientY - 30, `💬 "${npc.phrases[Math.floor(Math.random() * npc.phrases.length)]}"`, "#ffffff"); }
@@ -612,7 +625,7 @@ class NebulaFarmPro {
                 this.applyDragTool(raycaster, e.clientX, e.clientY); 
             } else if (this.isPanning) {
                 const moveX = e.clientX - this.panStart.x; const moveY = e.clientY - this.panStart.y;
-                if (Math.abs(moveX) > 15 || Math.abs(moveY) > 15) { 
+                if (Math.abs(moveX) > 10 || Math.abs(moveY) > 10) { 
                     this.hasPanned = true; this.pendingBubble = null; const f = 0.08; 
                     let newX = this.camera.position.x - (moveX * f) - (moveY * f); let newZ = this.camera.position.z + (moveX * f) - (moveY * f);
                     this.camera.position.x = Math.max(-60, Math.min(100, newX)); this.camera.position.z = Math.max(-60, Math.min(100, newZ));
@@ -662,7 +675,6 @@ class NebulaFarmPro {
 
         document.querySelectorAll('.bubble-item').forEach(item => {
             if (!item.classList.contains('locked')) {
-                // A CHAVE DO ARRASTAR DO MOUSE ESTÁ AQUI
                 item.addEventListener('pointerdown', (e) => { 
                     e.preventDefault(); e.stopPropagation();
                     this.activeDragTool = e.currentTarget.dataset.tool; 
@@ -692,7 +704,7 @@ class NebulaFarmPro {
                     else if (this.activeDragTool === 'make_cheese' && this.state.inventory.milk >= 2 && fac.type === 'dairy') { this.state.inventory.milk -= 2; fac.state = 'baking'; fac.timer = Date.now(); this.spawnFX(x, y, "PRODUZINDO...", "#f1c40f"); } 
                     else if (this.activeDragTool === 'make_silage' && this.state.inventory.corn >= 2 && fac.type === 'trench') { this.state.inventory.corn -= 2; fac.state = 'baking'; fac.timer = Date.now(); this.spawnFX(x, y, "FERMENTANDO...", "#689f38"); } 
                     else if (this.activeDragTool === 'recycle' && this.state.inventory.junk >= 2 && fac.type === 'recycler') { this.state.inventory.junk -= 2; fac.state = 'baking'; fac.timer = Date.now(); this.spawnFX(x, y, "RECICLANDO...", "#2ecc71"); }
-                    this.activeDragTool = null; this.isDragging = false; this.hideBubble(); this.updateUI(); this.saveToCloud(true);
+                    this.updateUI(); this.saveToCloud(true);
                 }
             } return;
         }
@@ -706,38 +718,35 @@ class NebulaFarmPro {
                     if (fac.type === 'dairy') { this.state.inventory.cheese++; this.state.xp += this.config.cheese.xp; this.spawnFX(x, y, "+1 🧀", "#f1c40f"); }
                     if (fac.type === 'trench') { this.state.inventory.silage++; this.state.xp += this.config.silage.xp; this.spawnFX(x, y, "+1 🚜", "#689f38"); }
                     if (fac.type === 'recycler') { this.state.inventory.fertilizer++; this.state.xp += this.config.fertilizer.xp; this.spawnFX(x, y, "+1 🧪", "#2ecc71"); }
-                    this.state.siloCount++; fac.state = 'idle'; this.checkLevel(); this.activeDragTool = null; this.isDragging = false; this.hideBubble(); this.updateUI(); this.saveToCloud(true);
+                    this.state.siloCount++; fac.state = 'idle'; this.checkLevel(); this.updateUI(); this.saveToCloud(true);
                 }
             } return;
         }
 
         if (this.activeDragTool === 'harvest') {
-            if (ud.isPlant) { this.harvestPlant(ud.parentRef, x, y); } 
-            else if (ud.isAnimal) { this.harvestAnimal(ud.parentRef, x, y); }
+            if (ud.isPlant) { this.harvestPlant(ud.parentRef, x, y); return; } 
+            else if (ud.isAnimal) { this.harvestAnimal(ud.parentRef, x, y); return; }
         } else if (this.activeDragTool === 'feed') {
-            if (ud.isAnimal) { this.feedAnimal(ud.parentRef, x, y); }
+            if (ud.isAnimal) { this.feedAnimal(ud.parentRef, x, y); return; }
         } else if (this.activeDragTool === 'fish') {
-             if (ud.isLake) { this.startFishing(x, y); this.activeDragTool = null; this.isDragging = false; this.hideBubble(); }
+             if (ud.isLake) { this.startFishing(x, y); return; }
         } else {
             const seedType = this.activeDragTool;
-            if (this.config[seedType].isTree) { 
-                // A Árvore NÃO PLANTA se passar em cima da horta
+            if (this.config[seedType] && this.config[seedType].isTree) { 
                 const hitsTiles = raycaster.intersectObjects(this.tiles);
-                if (obj === this.grass && hitsTiles.length === 0 && Date.now() - this.lastTreePlantTime > 400) { this.plantTree(targetHit.point, seedType); this.lastTreePlantTime = Date.now(); this.updateBubbleQuantity(seedType); }
-            } else { 
-                if (ud.isTile && !ud.occupied) { this.plant(ud.tileRef, seedType); this.updateBubbleQuantity(seedType); } 
+                if (obj === this.grass && hitsTiles.length === 0 && Date.now() - this.lastTreePlantTime > 400) { this.plantTree(targetHit.point, seedType); this.lastTreePlantTime = Date.now(); }
+            } else if (this.config[seedType] && !this.config[seedType].isTree) { 
+                if (ud.isTile && !ud.occupied) { this.plant(ud.tileRef, seedType); } 
             }
         }
     }
-
-    updateBubbleQuantity(tool) { const bubbleItem = document.querySelector(`.bubble-item[data-tool="${tool}"] small`); if (bubbleItem) { const qty = this.state.inventory[tool]; bubbleItem.innerText = qty; if(qty <= 0) bubbleItem.parentElement.classList.add('locked'); } }
 
     feedAnimal(animalGroup, x, y) {
         const anim = this.animals.find(a => a.mesh === animalGroup);
         if (!anim || anim.state !== 'hungry' || this.state.inventory.feed <= 0) return;
         this.state.inventory.feed--; anim.state = 'producing'; anim.produceTimer = Date.now(); anim.timer = 0;
         if (typeof TWEEN !== 'undefined') { new TWEEN.Tween(anim.mesh.scale).to({x: 1, y: 1, z: 1}, 300).easing(TWEEN.Easing.Bounce.Out).start(); }
-        this.spawnFX(x, y, "❤️", "#F44336"); this.updateBubbleQuantity('feed'); this.updateUI(); this.saveToCloud(true);
+        this.spawnFX(x, y, "❤️", "#F44336"); this.updateUI(); this.saveToCloud(true);
     }
 
     harvestAnimal(animalGroup, x, y) {
@@ -924,7 +933,7 @@ class NebulaFarmPro {
 
             this.renderer.render(this.scene, this.camera);
         } catch (e) {
-            // MURALHA DE TITÂNIO - SE OCORRER ERRO, IGNORA E CONTINUA O JOGO
+            // LOOP PROTEGIDO
         }
     }
 }
