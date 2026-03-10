@@ -1,4 +1,4 @@
-body, html { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: #87CEEB; user-select: none; }
+body, html { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat', sans-serif; background: #87CEEB; user-select: none; touch-action: none; }
 #loader { position: fixed; inset: 0; background: #0B1D3A; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; color: white; transition: 0.5s; }
 .spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -60,10 +60,11 @@ body, html { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat',
 .btn-market { background: #2196F3; color: white; border: none; padding: 15px 25px; border-radius: 20px; font-weight: 900; font-size: 16px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); pointer-events: auto; transition: 0.2s; border: 2px solid white;}
 
 #bubble-menu { position: absolute; display: none; gap: 10px; transform: translate(-50%, -100%); margin-top: -20px; z-index: 10000; pointer-events: auto; }
-.bubble-item { width: 60px; height: 60px; background: #fff; border: 3px solid #3498db; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s; pointer-events: auto;}
+.bubble-item { width: 60px; height: 60px; background: #fff; border: 3px solid #3498db; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; cursor: grab; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s; pointer-events: auto;}
+.bubble-item:active { cursor: grabbing; }
 .bubble-item:hover { transform: scale(1.1); }
 .bubble-item small { font-size: 12px; font-weight: bold; color: #333; margin-top: 2px; }
-.bubble-item.locked { filter: grayscale(1); opacity: 0.5; }
+.bubble-item.locked { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
 
 .floating-feedback { position: absolute; font-weight: 900; font-size: 20px; text-shadow: 2px 2px 0 #000; animation: floatUp 1s forwards; pointer-events: none; z-index: 2000; transform: translate(-50%, -50%); white-space: nowrap; }
 @keyframes floatUp { 0% { opacity: 1; margin-top: 0; } 100% { opacity: 0; margin-top: -80px; } }
@@ -73,9 +74,3 @@ body, html { margin: 0; padding: 0; overflow: hidden; font-family: 'Montserrat',
 .place-btn.cancel { background: #e74c3c; } .place-btn.confirm { background: #2ecc71; }
 
 .driving-alert { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 10px 20px; border-radius: 30px; font-weight: 900; font-size: 16px; z-index: 1000; display: none; pointer-events: none; }
-
-@media (max-width: 768px) {
-    .game-header { flex-direction: column; align-items: center; gap: 10px; }
-    .left-section, .center-section, .right-section { justify-content: center; width: 100%; }
-    .sell-grid { grid-template-columns: repeat(2, 1fr); }
-}
